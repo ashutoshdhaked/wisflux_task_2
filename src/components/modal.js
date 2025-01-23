@@ -14,7 +14,7 @@ const Modal = ({showModal , setShowModal , children})=>{
                     </button>
                   </div>
                   <hr></hr>
-                  <div className="h-72 overflow-auto w-full">
+                  <div className="h-96 overflow-auto w-full">
                     {children}
                   </div>
                 </div>

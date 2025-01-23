@@ -1,30 +1,45 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
+const Register = () => {
+  const Navigate = useNavigate();
+  const [user, setUser] = useState({
+    fullname: "",
+    email: "",
+    password: "",
+  });
+  function handleInputChange(e) {
+    const { name, value } = e.target;
+    setUser((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  }
 
-const Register = ()=>{
-    const [user , setUser] = useState({
-       fullname :'', 
-       email : '',
-       password :''
+  const submit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("http://localhost:3000/admin/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(user),
       });
-      function handleInputChange(e){
-       const { name, value } = e.target;
-       setUser(prevState => ({
-           ...prevState,
-           [name]: value
-       }));
-     }
-
-     const submit = (e)=>{
-        e.preventDefault();
-        console.log(user);
+      const res = await response.json();
+      if (res.statusCode === 500) {
+        alert("An error occurred. Please try again later.");
+      } else {
+        Navigate("/");
+      }
+    } catch (error) {
+      alert("An error occurred. Please try again later.");
     }
+  };
 
-
-    return(
-        <>
-          <section className="bg-gray-200 ">
+  return (
+    <>
+      <section className="bg-gray-200 ">
         <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
           <div className="w-full bg-white rounded-lg shadow-md  md:mt-0 sm:max-w-md xl:p-0">
             <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
@@ -32,7 +47,7 @@ const Register = ()=>{
                 New User Register
               </h1>
               <form className="space-y-4 md:space-y-6" onSubmit={submit}>
-              <div>
+                <div>
                   <label
                     htmlFor="fullname"
                     className="block mb-2 text-sm font-medium text-gray-900"
@@ -80,18 +95,23 @@ const Register = ()=>{
                     name="password"
                     id="password"
                     value={user.password}
-                    onChange={handleInputChange} 
+                    onChange={handleInputChange}
                     placeholder="••••••••"
                     className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 "
                     required=""
                   />
                 </div>
-                 <div className="flex justify-end">
-                 <NavLink  to="/signin" className='text-slate-700 hover:text-slate-900 cursor-pointer bg-slate-100 py-1 px-2 rounded-sm'>Already a user ?</NavLink> 
-                 </div>
+                <div className="flex justify-end">
+                  <NavLink
+                    to="/"
+                    className="text-slate-700 hover:text-slate-900 cursor-pointer bg-slate-100 py-1 px-2 rounded-sm"
+                  >
+                    Already a user ?
+                  </NavLink>
+                </div>
                 <button
-                 type="submit"
-                 className=" text-white bg-slate-600 hover:bg-slate-800 text-center py-2 px-8 rounded-md w-full"
+                  type="submit"
+                  className=" text-white bg-slate-600 hover:bg-slate-800 text-center py-2 px-8 rounded-md w-full"
                 >
                   Register
                 </button>
@@ -100,8 +120,8 @@ const Register = ()=>{
           </div>
         </div>
       </section>
-        </>
-    )
-}
+    </>
+  );
+};
 
 export default Register;

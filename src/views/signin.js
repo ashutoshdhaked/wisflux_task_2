@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const SignIn = () => {
+   const Navigate = useNavigate();
    const [user , setUser] = useState({
     email : '',
     password :''
@@ -13,9 +15,29 @@ const SignIn = () => {
         [name]: value
     }));
   }
-  const submit = (e)=>{
+   const submit = async(e)=>{
     e.preventDefault();
-    console.log(user);
+    try {
+      const response = await fetch("http://localhost:3000/admin/signin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(user),
+      });
+        const res = await response.json();
+      if (res) {
+        localStorage.setItem('token', res.token);
+        localStorage.setItem('name', res.name);
+        Navigate("/dashboard");
+        
+      } else {
+        alert("An error occurred. Please try again later.");
+       }
+    } catch (error) {
+      console.error("Network error:", error);
+      alert("An error occurred. Please try again later.");
+    }
   } 
 
   return (

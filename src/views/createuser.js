@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const CreateUser = () => {
+const CreateUser = ({ setShowModal,setChangeState }) => {
   const [user, setUser] = useState({
     name: "",
     email: "",
@@ -8,6 +8,7 @@ const CreateUser = () => {
     branch: "",
     semester: null,
   });
+  const [loading, setLoading] = useState(false);
   const [image, setimage] = useState(null);
   const handleImageChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -22,21 +23,33 @@ const CreateUser = () => {
     }));
   };
 
-  const submit = (e) => {
+  const submit = async (e) => {
+    setLoading(true);
     e.preventDefault();
     const data = new FormData();
     data.append("file", image);
-    data.append("user", user);
-    // const option = {
-    //   method: "POST",
-    //   body: data,
-    // };
-   console.log('data : '+  data);
-   console.log({user , image});
-   
+    data.append("user", JSON.stringify(user));
 
-   
-
+    try {
+      const response = await fetch("http://localhost:3000/student", {
+        method: "POST",
+        body: data,
+      });
+      if (response.status === 201) {
+        alert("user successfully created !!");
+        setShowModal(false);
+        setLoading(false);
+        setChangeState(true);
+      } else {
+        alert("Error : User is not created !!");
+        setShowModal(false);
+        setLoading(false);
+        setChangeState(true);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setShowModal(false);
+    }
   };
 
   return (
@@ -104,58 +117,59 @@ const CreateUser = () => {
                   />
                 </div>
 
-               <div>
-               <label
+                <div>
+                  <label
                     htmlFor="branch"
                     className="block mb-2 text-sm font-medium text-gray-900"
                   >
                     Student Branch
                   </label>
-               <select
-                  id="branch"
-                  name="branch"
-                  value={user.branch}
-                  onChange={handaleChange}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-                >
-                  <option value="">Select Branch</option>
-                  <option value="Computer Science And Engineering">CSE</option>
-                  <option value="Civil Engineering">CE</option>
-                  <option value="Mechanical Engineering">ME</option>
-                  <option value=" Electronics & Communication Engineering">
-                    ECE
-                  </option>
-                  <option value="Automobile Engineering">AE</option>
-                  <option value="Artificial Intelligence">AI</option>
-                </select>
-               </div>
+                  <select
+                    id="branch"
+                    name="branch"
+                    value={user.branch}
+                    onChange={handaleChange}
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+                  >
+                    <option value="">Select Branch</option>
+                    <option value="Computer Science And Engineering">
+                      CSE
+                    </option>
+                    <option value="Civil Engineering">CE</option>
+                    <option value="Mechanical Engineering">ME</option>
+                    <option value=" Electronics & Communication Engineering">
+                      ECE
+                    </option>
+                    <option value="Automobile Engineering">AE</option>
+                    <option value="Artificial Intelligence">AI</option>
+                  </select>
+                </div>
 
-              <div>
-
-              <label
+                <div>
+                  <label
                     htmlFor="semester"
                     className="block mb-2 text-sm font-medium text-gray-900"
                   >
                     Student Semester
                   </label>
-              <select
-                  id="semester"
-                  name="semester"
-                  value={user.semester}
-                  onChange={handaleChange}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-                >
-                  <option value={null}>Select Semester</option>
-                  <option value={1}>1st</option>
-                  <option value={2}>2nd</option>
-                  <option value={3}>3rd</option>
-                  <option value={4}>4th</option>
-                  <option value={5}>5th</option>
-                  <option value={6}>6th</option>
-                  <option value={7}>7th</option>
-                  <option value={8}>8th</option>
-                </select>
-              </div>
+                  <select
+                    id="semester"
+                    name="semester"
+                    value={user.semester}
+                    onChange={handaleChange}
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+                  >
+                    <option value={null}>Select Semester</option>
+                    <option value={1}>1st</option>
+                    <option value={2}>2nd</option>
+                    <option value={3}>3rd</option>
+                    <option value={4}>4th</option>
+                    <option value={5}>5th</option>
+                    <option value={6}>6th</option>
+                    <option value={7}>7th</option>
+                    <option value={8}>8th</option>
+                  </select>
+                </div>
 
                 <div>
                   <label
@@ -175,8 +189,9 @@ const CreateUser = () => {
                 <button
                   type="submit"
                   className=" text-white bg-slate-600 hover:bg-slate-800 text-center py-2 px-8 rounded-md w-full"
+                  disabled={loading}
                 >
-                  Create User
+                  {loading ? "Creating...." : "Create User"}
                 </button>
               </form>
             </div>

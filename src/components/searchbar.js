@@ -2,9 +2,9 @@ import { useState } from "react";
 import Modal from "./modal";
 import CreateUser from "../views/createuser";
 
-const SearchBar = () => {
+const SearchBar = ({users,setUsers , setLoading,setChangeState}) => {
   const [search, setSearch] = useState({
-    key: "",
+    key: "name",
     text: "",
   });
  const [showModal , setShowModal] = useState(false); 
@@ -17,9 +17,27 @@ const SearchBar = () => {
     }));
   };
  
-  const searchUser = (e) => {
+  const searchUser = async (e) => {
     e.preventDefault();
-    console.log(search);
+    setLoading(true);
+     try{
+
+      const response = await fetch(`http://localhost:3000/student/filter/${search.key}/${search.text}`);
+      const res = await response.json();
+      console.log(res);
+      if(res){
+        setUsers(res);
+        setLoading(false);
+      }
+      else{
+          setUsers(users);
+          setLoading(false);
+      }
+     }
+     catch(err){
+      setLoading(false);
+      alert("Internal Server Error !!");
+     }
   };
 
   return (
@@ -33,7 +51,7 @@ const SearchBar = () => {
             Add Student
           </button>
            <Modal showModal={showModal} setShowModal={setShowModal}>
-            <CreateUser/>
+            <CreateUser setShowModal={setShowModal} setChangeState={setChangeState}/>
            </Modal>
         </div>
 
@@ -46,7 +64,7 @@ const SearchBar = () => {
               onChange={handaleChange}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-l-lg block w-28 p-2.5"
             >
-              <option value="">Filter By</option>
+              <option value=" ">Filter By</option>
               <option value="name">Name</option>
               <option value="semester">Semester</option>
               <option value="branch">Branch</option>

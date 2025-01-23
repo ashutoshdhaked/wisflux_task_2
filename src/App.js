@@ -1,15 +1,24 @@
- import SignIn from "./views/signin";
- import Register from "./views/register";
- import {Routes,Route} from 'react-router-dom';
+import SignIn from "./views/signin";
+import Register from "./views/register";
+import { Routes, Route } from "react-router-dom";
 import DashBoard from "./views/dashboard";
-function App() {
+import ProtectedRoute from "./protectedroute";
+import PublicRoute from "./publicroute";
+
+
+function App() { 
   return (
     <div>
       <Routes>
-       <Route path="/signin" element={<SignIn/>}></Route>
-       <Route path="/register" element={<Register/>}></Route>
-       <Route path="/dashboard" element={<DashBoard/>}></Route>
-      </Routes>  
+        <Route element={<PublicRoute />}>
+          <Route path="/" element={<SignIn />} />
+          <Route path="/register" element={<Register />} />
+        </Route>
+
+        <Route element={<ProtectedRoute/>}>
+          <Route path="/dashboard" element={<DashBoard />} />
+        </Route>
+      </Routes>
     </div>
   );
 }
