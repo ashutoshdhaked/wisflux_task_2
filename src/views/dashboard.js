@@ -5,6 +5,15 @@ import Loader from "../components/loader";
 import Modal from "../components/modal";
 import ShowUserDetail from "./showuserdetail";
 import UpdateUser from "./updateuser";
+import axios from "axios";
+import { useMutation } from "@tanstack/react-query";
+
+const deleteUserInDb = async(user)=>{
+  const response = await axios.delete(
+    `http://localhost:3000/student/${user.id}`
+  ); 
+  return response.status;
+}
 
 const DashBoard = () => {
   const [users, setUsers] = useState([]);
@@ -20,37 +29,38 @@ const DashBoard = () => {
     setModalView("view");
   };
 
+  const mutation = useMutation({
+    mutationFn : deleteUserInDb,
+    onSuccess :()=>{
+      setChangeState(true);
+      alert("User Deleted !!");
+    },
+    onError : ()=>{
+      setChangeState(true);
+      alert("Error : User Not Deleted !!");
+    }
+  })
+
   const deleteUser = async (user) => {
     if (window.confirm(`Are you sure you want to delete ${user.name}`)) {
-      const response = await fetch(`http://localhost:3000/student/${user.id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const res = await response.json();
-      if (res) {
-        setChangeState(true);
-      } else {
-        alert("Error : User Not Deleted !!");
-      }
+         mutation.mutate(user);
+         setChangeState(true);
     } else {
       alert("Ok : No Action Performed !!");
     }
   };
 
   const updateUser = (user) => {
-     setShowModal(true);
-     setModalView("update");
-     setViewUser(user);
+    setShowModal(true);
+    setModalView("update");
+    setViewUser(user);
   };
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch("http://localhost:3000/student");
-        const res = await response.json();
-        setUsers(res);
+        const response = await axios.get("http://localhost:3000/student");
+        setUsers(response.data);
         setLoading(false);
       } catch (err) {
         alert("Error fetching users");
@@ -66,13 +76,22 @@ const DashBoard = () => {
       <section className="bg-gray-200 flex-col gap-4">
         <div>
           <NavBar />
-          <SearchBar  users={users}  setUsers={setUsers} setLoading={setLoading}  setChangeState={setChangeState}/>
+          <SearchBar
+            users={users}
+            setUsers={setUsers}
+            setLoading={setLoading}
+            setChangeState={setChangeState}
+          />
           {showModal ? (
             <Modal showModal={showModal} setShowModal={setShowModal}>
               {modalView === "view" ? (
                 <ShowUserDetail viewUser={viewUser} />
               ) : modalView === "update" ? (
-                <UpdateUser viewUser={viewUser} setChangeState={setChangeState} setShowModal={setShowModal}/>
+                <UpdateUser
+                  viewUser={viewUser}
+                  setChangeState={setChangeState}
+                  setShowModal={setShowModal}
+                />
               ) : (
                 ""
               )}
@@ -86,23 +105,23 @@ const DashBoard = () => {
         ) : (
           <>
             <div>
-              <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-                <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                  <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+              <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+                <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                  <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
-                      <th scope="col" class="px-6 py-3">
+                      <th scope="col" className="px-6 py-3">
                         Student Name
                       </th>
-                      <th scope="col" class="px-6 py-3">
+                      <th scope="col" className="px-6 py-3">
                         Semester
                       </th>
-                      <th scope="col" class="px-6 py-3">
+                      <th scope="col" className="px-6 py-3">
                         Branch
                       </th>
-                      <th scope="col" class="px-6 py-3">
+                      <th scope="col" className="px-6 py-3">
                         View Details
                       </th>
-                      <th scope="col" class="px-6 py-3">
+                      <th scope="col" className="px-6 py-3">
                         Action
                       </th>
                     </tr>

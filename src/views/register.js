@@ -1,5 +1,17 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import axios from 'axios';
+import { useMutation } from "@tanstack/react-query";
+
+
+const registerUser = async(user)=>{
+  const response = await axios.post("http://localhost:3000/admin/register", user, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  }); 
+  return response.data;
+}
 
 const Register = () => {
   const Navigate = useNavigate();
@@ -15,26 +27,23 @@ const Register = () => {
       [name]: value,
     }));
   }
+  const mutation = useMutation({
+    mutationFn: registerUser,  
+    onSuccess: (data) => {
+      if (data) {
+        Navigate("/");
+      } else {
+        alert("An error occurred. Please try again later.");
+      }
+    },
+    onError: () => {
+      alert("An error occurred. Please try again later.");
+    },
+  });
 
   const submit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await fetch("http://localhost:3000/admin/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(user),
-      });
-      const res = await response.json();
-      if (res.statusCode === 500) {
-        alert("An error occurred. Please try again later.");
-      } else {
-        Navigate("/");
-      }
-    } catch (error) {
-      alert("An error occurred. Please try again later.");
-    }
+    mutation.mutate(user);
   };
 
   return (

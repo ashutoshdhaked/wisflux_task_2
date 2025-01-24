@@ -6,19 +6,19 @@ import ProtectedRoute from "./protectedroute";
 import PublicRoute from "./publicroute";
 
 
-function App() { 
+function App() {
   return (
     <div>
-      <Routes>
-        <Route element={<PublicRoute />}>
-          <Route path="/" element={<SignIn />} />
-          <Route path="/register" element={<Register />} />
-        </Route>
+        <Routes>
+          <Route element={<PublicRoute />}>
+            <Route path="/" element={<SignIn />} />
+            <Route path="/register" element={<Register />} />
+          </Route>
 
-        <Route element={<ProtectedRoute/>}>
-          <Route path="/dashboard" element={<DashBoard />} />
-        </Route>
-      </Routes>
+          <Route element={<ProtectedRoute />}>
+            <Route path="/dashboard" element={<DashBoard />} />
+          </Route>
+        </Routes>
     </div>
   );
 }

@@ -8,7 +8,7 @@ const ShowUserDetail = ({viewUser}) => {
           <img
             class="h-auto max-w-full rounded-lg"
             src={viewUser.image}
-            alt="image description"
+            alt="image_description"
           />
         </figure>
            </div>

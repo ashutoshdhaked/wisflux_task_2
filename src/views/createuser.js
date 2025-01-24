@@ -1,6 +1,17 @@
 import { useState } from "react";
+import axios from "axios";
+import { useMutation } from "@tanstack/react-query";
 
-const CreateUser = ({ setShowModal,setChangeState }) => {
+const createStudent = async (data) => {
+  const response = await axios.post("http://localhost:3000/student", data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};
+
+const CreateUser = ({ setShowModal, setChangeState }) => {
   const [user, setUser] = useState({
     name: "",
     email: "",
@@ -23,33 +34,36 @@ const CreateUser = ({ setShowModal,setChangeState }) => {
     }));
   };
 
+  const mutation = useMutation({
+    mutationFn: createStudent,
+    onSuccess: (data) => {
+      if (data) {
+        alert("user successfully created !!");
+        setChangeState(true);
+        setShowModal(false);
+        setLoading(false);
+      } else {
+        alert("Error : User is not created !!");
+        setChangeState(true);
+        setShowModal(false);
+        setLoading(false);
+      }
+    },
+    onError: () => {
+      alert("Error : User is not created !!");
+      setChangeState(true);
+      setShowModal(false);
+      setLoading(false);
+    },
+  });
+
   const submit = async (e) => {
     setLoading(true);
     e.preventDefault();
     const data = new FormData();
     data.append("file", image);
     data.append("user", JSON.stringify(user));
-
-    try {
-      const response = await fetch("http://localhost:3000/student", {
-        method: "POST",
-        body: data,
-      });
-      if (response.status === 201) {
-        alert("user successfully created !!");
-        setShowModal(false);
-        setLoading(false);
-        setChangeState(true);
-      } else {
-        alert("Error : User is not created !!");
-        setShowModal(false);
-        setLoading(false);
-        setChangeState(true);
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      setShowModal(false);
-    }
+    mutation.mutate(data);
   };
 
   return (
@@ -131,7 +145,7 @@ const CreateUser = ({ setShowModal,setChangeState }) => {
                     onChange={handaleChange}
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
                   >
-                    <option value="">Select Branch</option>
+                    <option value=" ">Select Branch</option>
                     <option value="Computer Science And Engineering">
                       CSE
                     </option>
@@ -159,7 +173,7 @@ const CreateUser = ({ setShowModal,setChangeState }) => {
                     onChange={handaleChange}
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
                   >
-                    <option value={null}>Select Semester</option>
+                    <option value=" ">Select Semester</option>
                     <option value={1}>1st</option>
                     <option value={2}>2nd</option>
                     <option value={3}>3rd</option>

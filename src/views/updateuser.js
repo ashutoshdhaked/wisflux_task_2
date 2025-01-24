@@ -1,4 +1,15 @@
 import { useState } from "react";
+import axios from "axios";
+import { useMutation } from "@tanstack/react-query";
+
+const updateUserInDb = async({id,data})=>{
+  const response = await axios.put(`http://localhost:3000/student/${id}`,data,{
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+}
 
 const UpdateUser = ({ viewUser , setChangeState , setShowModal }) => {
   const [loading, setLoading] = useState(false);
@@ -25,22 +36,10 @@ const UpdateUser = ({ viewUser , setChangeState , setShowModal }) => {
     setimage(selectedFile);
   };
 
-  const submit = async (e) => {
-    setLoading(true);
-    e.preventDefault();
-    const data = new FormData();
-    data.append("file", image);
-    data.append("user", JSON.stringify(updateUser));
-    try {
-      const response = await fetch(
-        `http://localhost:3000/student/${viewUser.id}`,
-        {
-          method: "PUT",
-          body: data,
-        }
-      );
-      const res = await response.json();
-      if (res) {
+  const mutation = useMutation({
+    mutationFn: updateUserInDb,
+    onSuccess: (data) => {
+      if (data) {
         alert("user successfully Updated !!");
         setLoading(false);
         setChangeState(true);
@@ -51,9 +50,24 @@ const UpdateUser = ({ viewUser , setChangeState , setShowModal }) => {
         setChangeState(true);
         setShowModal(false);
       }
-    } catch (error) {
-      console.error("Error:", error);
-    }
+    },
+    onError: () => {
+      alert("Error : User is not updated !!");
+      setLoading(false);
+      setChangeState(true);
+      setShowModal(false);
+    },
+  });
+
+
+  const submit = async (e) => {
+    setLoading(true);
+    e.preventDefault();
+    const data = new FormData();
+    data.append("file", image);
+    data.append("user", JSON.stringify(updateUser));
+    const id = viewUser.id;
+    mutation.mutate({id , data});
   };
 
   return (
@@ -65,7 +79,7 @@ const UpdateUser = ({ viewUser , setChangeState , setShowModal }) => {
               <img
                 class="h-auto max-w-full rounded-lg"
                 src={viewUser.image}
-                alt="image description"
+                alt="image_description"
               />
             </figure>
             <div>

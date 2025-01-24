@@ -1,8 +1,16 @@
 import { useState } from "react";
 import Modal from "./modal";
 import CreateUser from "../views/createuser";
+import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
+
+const fetchUsers = async (key, text) => {
+  const response = await axios.get(`http://localhost:3000/student/filter/${key}/${text}`);
+  return response.data;
+};
 
 const SearchBar = ({users,setUsers , setLoading,setChangeState}) => {
+
   const [search, setSearch] = useState({
     key: "name",
     text: "",
@@ -16,28 +24,24 @@ const SearchBar = ({users,setUsers , setLoading,setChangeState}) => {
       [name]: value,
     }));
   };
- 
-  const searchUser = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-     try{
 
-      const response = await fetch(`http://localhost:3000/student/filter/${search.key}/${search.text}`);
-      const res = await response.json();
-      console.log(res);
-      if(res){
-        setUsers(res);
-        setLoading(false);
-      }
-      else{
-          setUsers(users);
-          setLoading(false);
-      }
-     }
-     catch(err){
+  const {isError, refetch } = useQuery({
+    queryKey: ["searchUsers", search.key, search.text],
+    queryFn: () => fetchUsers(search.key, search.text),
+    enabled: false,
+  });
+  
+  const searchUser = async (e) => {
+    setLoading(true);
+    e.preventDefault();
+    const result = await refetch();
+    if (isError) {
+      setUsers(users); 
       setLoading(false);
-      alert("Internal Server Error !!");
-     }
+    } else {
+      setUsers(result.data);
+      setLoading(false); 
+    }
   };
 
   return (
@@ -110,3 +114,32 @@ const SearchBar = ({users,setUsers , setLoading,setChangeState}) => {
 };
 
 export default SearchBar;
+
+
+
+
+
+
+
+
+// const [search, setSearch] = useState({
+//   key: "name",
+//   text: "",
+// });
+
+// const [showModal, setShowModal] = useState(false);
+
+
+
+// const handleChange = (e) => {
+//   const { name, value } = e.target;
+//   setSearch((prevState) => ({
+//     ...prevState,
+//     [name]: value,
+//   }));
+// };
+
+// const searchUser = (e) => {
+//   e.preventDefault();
+//   refetch(); 
+// };
