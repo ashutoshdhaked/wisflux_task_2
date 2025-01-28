@@ -5,11 +5,11 @@ import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 
 const fetchUsers = async (key, text) => {
-  const response = await axios.get(`http://localhost:3000/student/filter/${key}/${text}`);
+  const response = await axios.get(`http://localhost:3000/student/filter/${key}/${text}`,{withCredentials: true});
   return response.data;
 };
 
-const SearchBar = ({users,setUsers , setLoading,setChangeState}) => {
+const SearchBar = ({users,setUsers,setChangeState}) => {
 
   const [search, setSearch] = useState({
     key: "name",
@@ -32,15 +32,12 @@ const SearchBar = ({users,setUsers , setLoading,setChangeState}) => {
   });
   
   const searchUser = async (e) => {
-    setLoading(true);
     e.preventDefault();
     const result = await refetch();
     if (isError) {
       setUsers(users); 
-      setLoading(false);
     } else {
       setUsers(result.data);
-      setLoading(false); 
     }
   };
 

@@ -1,27 +1,52 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
 import NavBar from "../components/navbar";
 import SearchBar from "../components/searchbar";
 import Loader from "../components/loader";
 import Modal from "../components/modal";
 import ShowUserDetail from "./showuserdetail";
 import UpdateUser from "./updateuser";
-import axios from "axios";
-import { useMutation } from "@tanstack/react-query";
 
-const deleteUserInDb = async(user)=>{
+const fetchUsers = async () => {
+  const response = await axios.get("http://localhost:3000/student",{
+    withCredentials: true,
+  });
+  return response.data;
+};
+
+const deleteUserInDb = async (user) => {
   const response = await axios.delete(
     `http://localhost:3000/student/${user.id}`
-  ); 
+  ,{ withCredentials: true,});
   return response.status;
-}
+};
 
 const DashBoard = () => {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [viewUser, setViewUser] = useState({});
-  const [changeState, setChangeState] = useState(false);
   const [modalView, setModalView] = useState("");
+  const queryClient = useQueryClient();
+
+
+  const { data: users, isLoading } = useQuery({
+    queryKey: ["users"],
+    queryFn: fetchUsers,
+    onError: () => {
+      alert("Error fetching users");
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteUserInDb,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      alert("User Deleted !!");
+    },
+    onError: () => {
+      alert("Error: User Not Deleted !!");
+    },
+  });
 
   const viewDetail = (user) => {
     setViewUser(user);
@@ -29,24 +54,11 @@ const DashBoard = () => {
     setModalView("view");
   };
 
-  const mutation = useMutation({
-    mutationFn : deleteUserInDb,
-    onSuccess :()=>{
-      setChangeState(true);
-      alert("User Deleted !!");
-    },
-    onError : ()=>{
-      setChangeState(true);
-      alert("Error : User Not Deleted !!");
-    }
-  })
-
-  const deleteUser = async (user) => {
+  const deleteUser = (user) => {
     if (window.confirm(`Are you sure you want to delete ${user.name}`)) {
-         mutation.mutate(user);
-         setChangeState(true);
+      deleteMutation.mutate(user);
     } else {
-      alert("Ok : No Action Performed !!");
+      alert("Ok: No Action Performed !!");
     }
   };
 
@@ -56,31 +68,19 @@ const DashBoard = () => {
     setViewUser(user);
   };
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get("http://localhost:3000/student");
-        setUsers(response.data);
-        setLoading(false);
-      } catch (err) {
-        alert("Error fetching users");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUsers();
-  }, [changeState]);
-
   return (
     <>
       <section className="bg-gray-200 flex-col gap-4">
         <div>
           <NavBar />
           <SearchBar
-            users={users}
-            setUsers={setUsers}
-            setLoading={setLoading}
-            setChangeState={setChangeState}
+            users={users || []}
+            setUsers={(filteredUsers) =>
+              queryClient.setQueryData(["users"], filteredUsers)
+            }
+            setChangeState={() =>
+              queryClient.invalidateQueries({ queryKey: ["users"] })
+            }
           />
           {showModal ? (
             <Modal showModal={showModal} setShowModal={setShowModal}>
@@ -89,7 +89,9 @@ const DashBoard = () => {
               ) : modalView === "update" ? (
                 <UpdateUser
                   viewUser={viewUser}
-                  setChangeState={setChangeState}
+                  setChangeState={() =>
+                    queryClient.invalidateQueries({ queryKey: ["users"] })
+                  }
                   setShowModal={setShowModal}
                 />
               ) : (
@@ -100,7 +102,7 @@ const DashBoard = () => {
             ""
           )}
         </div>
-        {loading ? (
+        {isLoading ? (
           <Loader />
         ) : (
           <>

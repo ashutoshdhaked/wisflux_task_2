@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 
 const createStudent = async (data) => {
   const response = await axios.post("http://localhost:3000/student", data, {
+    withCredentials: true,
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -11,7 +12,7 @@ const createStudent = async (data) => {
   return response.data;
 };
 
-const CreateUser = ({ setShowModal, setChangeState }) => {
+const CreateUser = ({ setShowModal , setChangeState}) => {
   const [user, setUser] = useState({
     name: "",
     email: "",
@@ -39,21 +40,21 @@ const CreateUser = ({ setShowModal, setChangeState }) => {
     onSuccess: (data) => {
       if (data) {
         alert("user successfully created !!");
-        setChangeState(true);
         setShowModal(false);
         setLoading(false);
+        setChangeState();
       } else {
         alert("Error : User is not created !!");
-        setChangeState(true);
         setShowModal(false);
         setLoading(false);
+        setChangeState();
       }
     },
     onError: () => {
       alert("Error : User is not created !!");
-      setChangeState(true);
       setShowModal(false);
       setLoading(false);
+      setChangeState();
     },
   });
 

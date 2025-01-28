@@ -4,7 +4,9 @@ import { Routes, Route } from "react-router-dom";
 import DashBoard from "./views/dashboard";
 import ProtectedRoute from "./protectedroute";
 import PublicRoute from "./publicroute";
+import axios from 'axios';
 
+axios.defaults.withCredentials = true;
 
 function App() {
   return (

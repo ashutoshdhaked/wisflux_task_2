@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 
 const updateUserInDb = async({id,data})=>{
   const response = await axios.put(`http://localhost:3000/student/${id}`,data,{
+    withCredentials: true,
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -42,19 +43,19 @@ const UpdateUser = ({ viewUser , setChangeState , setShowModal }) => {
       if (data) {
         alert("user successfully Updated !!");
         setLoading(false);
-        setChangeState(true);
+        setChangeState();
         setShowModal(false);
       } else {
         alert("Error : User is not updated !!");
         setLoading(false);
-        setChangeState(true);
+        setChangeState();
         setShowModal(false);
       }
     },
     onError: () => {
       alert("Error : User is not updated !!");
       setLoading(false);
-      setChangeState(true);
+      setChangeState();
       setShowModal(false);
     },
   });
